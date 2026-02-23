@@ -1,15 +1,23 @@
-# 📡 SDR Modulation Analysis — BPSK & QPSK
+# 🛰️ Network Slicing in Satellite Systems for RAN (5G NR / NTN)
 
-> Developed as part of my Master's coursework in Modern Digital Communications at Cleveland State University (2024–2025).  
-> Documented here to showcase technical implementation, results, and methodology.
+> Developed as part of my Master's coursework in Satellite Communications at Cleveland State University (2024–2025).  
+> Documented here to showcase system design, simulation methodology, and performance results.
 
 ---
 
 ## 📌 Project Overview
 
-This project analyzes the performance of **BPSK (Binary Phase Shift Keying)** and **QPSK (Quadrature Phase Shift Keying)** modulation schemes using Software Defined Radio (SDR). The goal was to compare how each modulation technique performs under varying noise conditions and validate results against theoretical predictions.
+This project designs and simulates a **5G NR Network Slicing architecture** applied to **Non-Terrestrial Networks (NTN)** — specifically satellite-based Radio Access Networks (RAN). Network slicing allows a single physical satellite network to be logically divided into multiple independent virtual networks, each optimized for a different type of service.
 
-**Key Question:** How does modulation order affect Bit Error Rate (BER) as Signal-to-Noise Ratio (SNR) changes in a real SDR environment?
+**Three service classes were implemented and evaluated:**
+
+| Slice | Full Name | Use Case |
+|-------|-----------|----------|
+| eMBB | Enhanced Mobile Broadband | HD video streaming, high-speed data |
+| mMTC | Massive Machine-Type Communications | IoT sensors, smart devices |
+| URLLC | Ultra-Reliable Low-Latency Communications | Critical control, remote operations |
+
+**Core Research Question:** How can limited satellite spectrum and resources be dynamically allocated across eMBB, mMTC, and URLLC slices while meeting each slice's QoS requirements under NTN constraints?
 
 ---
 
@@ -17,102 +25,181 @@ This project analyzes the performance of **BPSK (Binary Phase Shift Keying)** an
 
 | Tool | Purpose |
 |------|---------|
-| MATLAB | Signal modeling, BER analysis, data visualization |
-| GNU Radio | SDR flowgraph design and signal processing |
-| USRP (Universal Software Radio Peripheral) | Hardware signal transmission and reception |
-| BPSK / QPSK | Modulation schemes under analysis |
+| MATLAB | System simulation, resource allocation modeling, performance evaluation |
+| MATLAB Toolboxes | Communications Toolbox, Signal Processing Toolbox |
+| 3GPP 5G NR Standards | Slice architecture and numerology reference (TR 38.821) |
+| NTN Channel Model | Satellite propagation delay and link budget modeling |
+
+---
+
+## 🏗️ System Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                   SATELLITE NODE (gNB-like)              │
+│                                                          │
+│   ┌──────────┐   ┌──────────┐   ┌──────────────────┐   │
+│   │  eMBB    │   │  mMTC    │   │     URLLC        │   │
+│   │  Slice   │   │  Slice   │   │     Slice        │   │
+│   │(High BW) │   │(Low BW,  │   │  (Low latency,   │   │
+│   │          │   │ massive) │   │   high reliability│   │
+│   └────┬─────┘   └────┬─────┘   └────────┬─────────┘   │
+│        │              │                   │              │
+│   ┌────▼──────────────▼───────────────────▼─────────┐   │
+│   │         Virtualized RAN (vRAN) Layer             │   │
+│   │      Resource Allocation & Spectrum Sharing      │   │
+│   └─────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────┘
+                         │
+              Satellite Link (NTN)
+              Propagation Delay: ~600ms (LEO) / ~250ms (MEO)
+                         │
+                  ┌──────▼──────┐
+                  │  User Terminal│
+                  └─────────────┘
+```
 
 ---
 
 ## 🔬 Methodology
 
-1. **Signal Generation** — Generated baseband BPSK and QPSK signals in MATLAB/GNU Radio
-2. **Channel Simulation** — Added AWGN (Additive White Gaussian Noise) at varying SNR levels (0 dB to 20 dB)
-3. **Transmission** — Transmitted and received signals over USRP hardware
-4. **Measurement** — Measured BER at each SNR point for both modulation schemes
-5. **Analysis** — Compared measured BER curves against theoretical values
+### Step 1 — Slice Architecture Design
+- Defined three logical slices (eMBB, mMTC, URLLC) with distinct QoS profiles
+- Assigned priority weights, bandwidth guarantees, and latency budgets per slice
+- Based architecture on 3GPP TR 38.821 NTN specifications
+
+### Step 2 — Resource Allocation Algorithm
+- Implemented dynamic spectrum sharing between slices using MATLAB
+- Designed a priority-based scheduler: URLLC > eMBB > mMTC under congestion
+- Applied bandwidth partitioning with minimum guaranteed resource blocks (RBs) per slice
+
+### Step 3 — NTN Channel Modeling
+- Modeled satellite propagation delay (LEO and GEO orbits)
+- Applied free-space path loss and rain fade margin to link budget
+- Simulated Doppler shift compensation for LEO satellite pass
+
+### Step 4 — Performance Evaluation
+- Measured throughput, packet loss rate, and latency per slice under varying load
+- Compared performance with and without slicing (baseline = no isolation)
+- Evaluated system under NTN constraints (high delay, limited bandwidth)
 
 ---
 
 ## 📊 Results
 
-<!-- TIP: Replace this section with your actual graphs/screenshots -->
+<!-- Replace with your actual simulation results and plots -->
 
-| SNR (dB) | BPSK BER (Measured) | QPSK BER (Measured) | Theoretical BPSK BER |
-|----------|---------------------|---------------------|----------------------|
-| 0        | [your value]        | [your value]        | 0.0786               |
-| 5        | [your value]        | [your value]        | 0.0060               |
-| 10       | [your value]        | [your value]        | 0.0000               |
+### Throughput per Slice
 
-> 📈 **Add your BER vs SNR plot here** — even a screenshot from MATLAB works great!  
-> Example: `![BER vs SNR](images/ber_vs_snr.png)`
+| Load Condition | eMBB Throughput | mMTC Throughput | URLLC Throughput |
+|----------------|-----------------|-----------------|------------------|
+| Low (25%)      | [your value] Mbps | [your value] Kbps | [your value] Mbps |
+| Medium (60%)   | [your value] Mbps | [your value] Kbps | [your value] Mbps |
+| High (90%)     | [your value] Mbps | [your value] Kbps | [your value] Mbps |
 
-**Key Finding:** [Write 1–2 sentences about what your results showed — e.g., "BPSK outperformed QPSK at low SNR values, consistent with theoretical predictions, while QPSK achieved higher spectral efficiency at SNR above X dB."]
+### Latency per Slice
+
+| Slice  | Target Latency | Measured Latency | Met? |
+|--------|---------------|------------------|------|
+| eMBB   | < 100ms       | [your value]     | ✅/❌ |
+| mMTC   | < 1000ms      | [your value]     | ✅/❌ |
+| URLLC  | < 10ms        | [your value]     | ✅/❌ |
+
+> 📈 **Add your MATLAB simulation plots here**  
+> Suggested plots to include:
+> - Throughput vs. Network Load (3 lines, one per slice)
+> - Latency CDF per slice
+> - Resource Block allocation over time
+>
+> Example: `![Throughput vs Load](images/throughput_vs_load.png)`
+
+**Key Finding:** [Write 2–3 sentences summarizing your main result — e.g., "The proposed slicing architecture successfully isolated URLLC traffic from eMBB and mMTC under high network load, maintaining latency below X ms. Without slicing, URLLC latency exceeded the 10ms threshold at loads above Y%."]
 
 ---
 
 ## 📁 Repository Structure
 
 ```
-SDR-Modulation-Analysis/
+Network-Slicing-Satellite-RAN/
 │
 ├── matlab/
-│   ├── bpsk_simulation.m       # BPSK signal generation and BER analysis
-│   ├── qpsk_simulation.m       # QPSK signal generation and BER analysis
-│   └── plot_ber_curves.m       # BER vs SNR visualization
+│   ├── main_simulation.m            # Entry point — runs full simulation
+│   ├── slice_architecture.m         # Slice definitions and QoS parameters
+│   ├── resource_allocator.m         # Dynamic spectrum sharing algorithm
+│   ├── ntn_channel_model.m          # Satellite link budget and delay model
+│   ├── performance_evaluator.m      # Throughput, latency, packet loss metrics
+│   └── plot_results.m               # Visualization of all results
 │
-├── gnuradio/
-│   └── sdr_flowgraph.grc       # GNU Radio flowgraph for USRP transmission
+├── results/
+│   └── [your exported .mat result files]
 │
 ├── images/
-│   └── ber_vs_snr.png          # Result plots (add your screenshots here)
+│   └── [your MATLAB plots as .png screenshots]
+│
+├── docs/
+│   └── system_design.pdf            # Optional: your project report or slides
 │
 └── README.md
 ```
 
-> 📝 *Update this structure to match your actual files before uploading.*
+> 📝 *Rename files to match your actual MATLAB script names before uploading.*
 
 ---
 
 ## ▶️ How to Run
 
-### MATLAB Simulation
+### Requirements
+- MATLAB R2022a or later
+- Communications Toolbox
+- Signal Processing Toolbox
+
+### Steps
 ```matlab
-% 1. Open MATLAB
-% 2. Navigate to the /matlab folder
-% 3. Run:
-run('bpsk_simulation.m')
-run('qpsk_simulation.m')
-run('plot_ber_curves.m')
-```
+% 1. Clone or download this repository
+% 2. Open MATLAB and navigate to the /matlab folder
+% 3. Run the main simulation:
+run('main_simulation.m')
 
-### GNU Radio (requires USRP hardware)
-```
-1. Open GNU Radio Companion
-2. Load sdr_flowgraph.grc
-3. Connect USRP hardware
-4. Click Run
-```
+% 4. To visualize results separately:
+run('plot_results.m')
 
-> ⚠️ USRP hardware is required for live transmission tests. MATLAB scripts run standalone without hardware.
+% Parameters can be adjusted at the top of main_simulation.m:
+%   - NUM_USERS per slice
+%   - BANDWIDTH_MHZ total available spectrum
+%   - ORBIT_TYPE ('LEO' or 'GEO')
+%   - LOAD_LEVEL (0.0 to 1.0)
+```
 
 ---
 
 ## 💡 Key Learnings
 
-- Gained practical understanding of how **modulation order trades off spectral efficiency vs. noise robustness**
-- Validated that measured BER closely matches theoretical AWGN channel predictions
-- Learned to configure and operate **USRP SDR hardware** with GNU Radio for real signal transmission
-- Strengthened skills in **MATLAB signal processing and data visualization**
+- Gained deep understanding of **3GPP 5G NR network slicing** concepts and how they apply to non-terrestrial networks
+- Learned how **NTN-specific constraints** (high propagation delay, Doppler shift, limited spectrum) challenge standard terrestrial 5G designs
+- Designed and implemented a **priority-based resource scheduler** that balances competing QoS requirements across service classes
+- Strengthened MATLAB skills for **complex system simulation and multi-variable performance analysis**
+- Understood the trade-offs between **spectral efficiency and service isolation** in virtualized RAN environments
 
 ---
 
 ## 🔭 Future Improvements
 
-- [ ] Extend analysis to higher-order modulations (8-PSK, 16-QAM)
-- [ ] Test under fading channel models (Rayleigh, Rician)
-- [ ] Add Python-based analysis scripts as an alternative to MATLAB
-- [ ] Automate BER measurements across SNR sweep
+- [ ] Extend to multi-satellite (constellation) scenario with inter-satellite handover
+- [ ] Implement machine learning-based dynamic resource allocation
+- [ ] Add GEO vs. LEO vs. MEO performance comparison
+- [ ] Simulate interference between adjacent satellite beams
+- [ ] Validate against real NTN measurement datasets (e.g., ESA or NASA open data)
+
+---
+
+## 📚 References
+
+- 3GPP TR 38.821 — *Solutions for NR to support Non-Terrestrial Networks*
+- 3GPP TS 28.530 — *Management of network slicing in mobile networks*
+- Lin, X. et al. — *"5G New Radio: Unveiling the Essentials of the Next Generation Wireless Access Technology"* — IEEE Communications Standards Magazine
+- Rinaldi, F. et al. — *"Non-Terrestrial Networks in 5G & Beyond"* — IEEE Access (2020)
+- Dr. Mehdi Rahmati, Satellite Communications
+
 
 ---
 
@@ -125,9 +212,4 @@ M.S. Electrical & Computer Engineering — Cleveland State University
 
 ---
 
-## 📚 References
-
-- Proakis, J. G. — *Digital Communications* (5th Ed.)
-- GNU Radio Documentation: https://wiki.gnuradio.org
-- Ettus Research USRP Documentation: https://www.ettus.com/support
-- [Add your course name/professor if you'd like to credit the coursework]
+*⭐ If you found this project useful or are working on something similar, feel free to connect on LinkedIn!*
