@@ -111,7 +111,7 @@ This project designs and simulates a **5G NR Network Slicing architecture** appl
 > - Latency CDF per slice
 > - Resource Block allocation over time
 >
-> Example: `![Throughput vs Load](images/throughput_vs_load.png)`
+> Example: `![Throughput vs Load](.png)`
 
 **Key Finding:** [Write 2–3 sentences summarizing your main result — e.g., "The proposed slicing architecture successfully isolated URLLC traffic from eMBB and mMTC under high network load, maintaining latency below X ms. Without slicing, URLLC latency exceeded the 10ms threshold at loads above Y%."]
 
